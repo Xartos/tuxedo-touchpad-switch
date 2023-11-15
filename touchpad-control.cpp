@@ -209,6 +209,7 @@ int toggle_touchpad_state() {
     int result = EXIT_SUCCESS;
 
     for (auto it = devnodes.begin(); it != devnodes.end(); ++it) {
+        int feature_report_id = get_hidraw_surface_button_switch_report_id(*it);
         int hidraw = open((*it).c_str(), O_WRONLY|O_NONBLOCK);
         if (hidraw < 0) {
             cerr << "open(\"" << *it << "\", O_WRONLY|O_NONBLOCK) failed." << endl;
@@ -216,7 +217,7 @@ int toggle_touchpad_state() {
         }
         else {
             // get the device's state first (feature report nr.7 - 0x07)
-            char buffer[2] = {0x07, 0x00};
+            char buffer[2] = {static_cast<char>(feature_report_id), 0x00};
             ioctl(hidraw, HIDIOCGFEATURE(2), buffer);
 
             // toggle the state
